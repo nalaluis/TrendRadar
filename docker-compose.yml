@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  trendradar:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trendradar
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      # AI provider settings
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      # Notification settings
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+      # Crawler settings
+      - CRAWLER_INTERVAL=${CRAWLER_INTERVAL:-3600}
+      - MAX_TRENDS=${MAX_TRENDS:-10}
+      - LANGUAGE=${LANGUAGE:-en}
+      - REGION=${REGION:-US}
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    networks:
+      - trendradar-net
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: trendradar-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - trendradar-net
+    command: redis-server --appendonly yes
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: trendradar-ollama
+    restart: unless-stopped
+    profiles:
+      - ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - trendradar-net
+    ports:
+      - "11434:11434"
+
+volumes:
+  redis_data:
+    driver: local
+  ollama_data:
+    driver: local
+
+networks:
+  trendradar-net:
+    driver: bridge
