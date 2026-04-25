@@ -8,7 +8,7 @@ services:
     container_name: trendradar
     restart: unless-stopped
     environment:
-      - TZ=America/New_York
+      - TZ=Europe/London
       # AI provider settings
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
@@ -19,10 +19,10 @@ services:
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
       - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
       # Crawler settings
-      - CRAWLER_INTERVAL=${CRAWLER_INTERVAL:-1800}
-      - MAX_TRENDS=${MAX_TRENDS:-20}
+      - CRAWLER_INTERVAL=${CRAWLER_INTERVAL:-3600}
+      - MAX_TRENDS=${MAX_TRENDS:-10}
       - LANGUAGE=${LANGUAGE:-en}
-      - REGION=${REGION:-US}
+      - REGION=${REGION:-GB}
     volumes:
       - ./data:/app/data
       - ./config:/app/config
